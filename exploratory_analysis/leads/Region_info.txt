@@ -1,0 +1,13 @@
+10 number of different values for Region
+
+values   counts
+north-west          2240
+midlands            1617
+north-east          1132
+scotland            1123
+south-east          1120
+south-west          1085
+wales                578
+south                563
+northern-ireland     277
+london               259

@@ -1,0 +1,10 @@
+7 number of different values for Sector
+
+values   counts
+retail           2899
+food             2115
+consultancy      1740
+wholesale        1479
+entertainment     913
+construction      587
+agriculture       261

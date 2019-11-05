@@ -1,0 +1,5 @@
+2 number of different values for Approval Decision
+
+values   counts
+REJECTED    511
+APPROVED    257
