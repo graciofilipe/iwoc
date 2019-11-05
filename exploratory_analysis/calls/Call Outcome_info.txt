@@ -1,0 +1,8 @@
+5 number of different values for Call Outcome
+
+values   counts
+CALL BACK LATER    1816
+INTERESTED         1296
+NOT INTERESTED     1211
+ANSWER MACHINE      514
+DEAD LINE           163

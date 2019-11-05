@@ -1,0 +1,8 @@
+5 number of different values for Agent
+
+values   counts
+orange    2234
+red       1478
+black      750
+green      339
+blue       199
