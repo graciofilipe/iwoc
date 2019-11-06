@@ -23,14 +23,37 @@ success rate (sing up credits divided by calls made)
 
 
 ##Was the variation between the agents’ signups-per-call statistically significant? Why? [5]
+yes. pva 1e-12 although violations of assumptions are snuk in
+
+
 
 ##A lead from which region is most likely to be “interested” in the product? [3]
+interest ration {'north-west': 1.7136150234741785, 'midlands': 0.6, 'scotland': 0.9256756756756757, 'south-west': 1.5046728971962617, 'north-east': 0.9788732394366197, 'wales': 0.5102040816326531, 'south-east': 1.0625, 'south': 0.8378378378378378, 'northern-ireland': 1.0, 'london': 5.090909090909091}
+
+
+
+
+
+
+
+
 
 ##A lead from which sector is most likely to be “interested” in the product? [1]
+sector interest ratio {'wholesale': 1.7388059701492538, 'retail': 0.6458797327394209, 'agriculture': 0.7894736842105263, 'food': 0.9525547445255474, 'construction': 0.4842105263157895, 'consultancy': 2.4471544715447155, 'entertainment': 1.3775510204081634}
+
+
+
 
 ##Given a lead has already expressed interest and signed up: 
 
 ###signups from which region are most likely to be approved? [2]
+
+
+
+
+
+
+
 
 ###Is this statistically significant? Why? [5]
 

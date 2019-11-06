@@ -8,13 +8,14 @@ from scipy.stats import chi2_contingency
 from scipy.stats import chi2
 
 def further_exploration(calls, leads, signups, folder=None):
-    leads_and_calls = calls.merge(leads, how='outer', on=['Phone Number'])
 
     number_of_unique_called_numbers = calls['Phone Number'].nunique()
     total_number_of_calls = calls.shape[0]
     print('average calls per phone number:', total_number_of_calls / number_of_unique_called_numbers)
 
     # For the leads that signed up, how many calls were received, on average?
+    print('\n')
+
     signed_up_names_ls = list(signups['Lead'])
     signed_up_leads_df = leads[leads['Name'].isin(signed_up_names_ls)]
     signed_up_phone_numbers_ls = list(signed_up_leads_df['Phone Number'])
@@ -26,6 +27,8 @@ def further_exploration(calls, leads, signups, folder=None):
           total_number_of_calls / number_of_unique_called_numbers)
 
     # ##Which agent had the most signups? Which assumptions did you make?
+    print('\n')
+
     calls_per_agent_per_sgined_number_df = calls_to_signed_up_numbers_df.groupby(by=['Phone Number', 'Agent']).count().drop(
         axis=1, labels=['Call Outcome']).rename({'Call Number': 'call_count_per_agent_per_number'}, axis=1)
     total_calls_to_number_df = calls_to_signed_up_numbers_df.groupby(by='Phone Number').count().drop(axis=1, labels=[
@@ -40,6 +43,8 @@ def further_exploration(calls, leads, signups, folder=None):
     print('how many sign up counts per agent:', agent_sign_up_counts)
 
     ##Which agent had the most signups per call?
+    print('\n')
+
     number_of_calls_per_agent_df = calls.groupby(by=['Agent']).count().drop(
         axis=1, labels=['Phone Number','Call Outcome']).rename({'Call Number': 'call_count_per_agent_per_number'}, axis=1)
     success_rate_per_agent = defaultdict(int)
@@ -48,31 +53,42 @@ def further_exploration(calls, leads, signups, folder=None):
     print('the success rate per agent', success_rate_per_agent)
 
     ## statiscal significant
+    print('\n')
     number_of_calls_per_agent_ls = [number_of_calls_per_agent_df.loc[agent][0] for agent in number_of_calls_per_agent_df.index]
     agent_sign_up_counts_ls = [int(agent_sign_up_counts[agent]) for agent in number_of_calls_per_agent_df.index]
-    table = [number_of_calls_per_agent_ls, agent_sign_up_counts_ls]
-    stat, p, dof, expected = chi2_contingency(table)
-    print('dof=%d' % dof)
-    print(expected)
-    # interpret test-statistic
-    prob = 0.95
-    critical = chi2.ppf(prob, dof)
-    print('probability=%.3f, critical=%.3f, stat=%.3f' % (prob, critical, stat))
-    if abs(stat) >= critical:
-        print('Dependent (reject H0)')
-    else:
-        print('Independent (fail to reject H0)')
-    # interpret p-value
-    alpha = 1.0 - prob
-    print('significance=%.3f, p=%.3f' % (alpha, p))
-    if p <= alpha:
-        print('Dependent (reject H0)')
-    else:
-        print('Independent (fail to reject H0)')
+    number_of_non_signup_calls_per_agent_ls = [number_of_calls_per_agent_ls[i]-agent_sign_up_counts_ls[i]
+                                               for i in range(5)]
+    table = [number_of_non_signup_calls_per_agent_ls, agent_sign_up_counts_ls]
+    stat, pval, dof, expected = chi2_contingency(table)
+    print('pval for the difference between success rates happening by chance', pval)
 
-    import ipdb; ipdb.set_trace()
+    ## A lead from which region is most likely to be “interested” in the product? [3]
+    print('\n')
+    # I'll interpret this as meaning as opposed to "not intested" although one could interpret it differently
+    regions = leads['Region'].unique()
+    calls_and_leads_df = calls.merge(leads, on='Phone Number', how='left')
+    number_of_calls_per_region_and_outcome_df  = calls_and_leads_df.groupby(by=['Region', 'Call Outcome']).count().drop(
+        axis=1, labels=['Phone Number',  'Agent',  'Call Number',  'Name',  'Sector']).rename({'Age': 'call_count'}, axis=1)
+    region_interest_ratio = {
+        region: number_of_calls_per_region_and_outcome_df.loc[(region, 'INTERESTED')][0]/number_of_calls_per_region_and_outcome_df.loc[(region, 'NOT INTERESTED')][0]
+                       for region in regions}
+    print('region interest ratio', region_interest_ratio)
 
+    print('\n')
+    ##A lead from which sector is most likely to be “interested” in the product? [1]
+    sectors = leads['Sector'].unique()
+    calls_and_leads_df = calls.merge(leads, on='Phone Number', how='left')
+    number_of_calls_per_region_and_outcome_df  = calls_and_leads_df.groupby(by=['Sector', 'Call Outcome']).count().drop(
+        axis=1, labels=['Phone Number',  'Agent',  'Call Number',  'Name',  'Region']).rename({'Age': 'call_count'}, axis=1)
+    sector_interest_ratio = {
+        sector: number_of_calls_per_region_and_outcome_df.loc[(sector, 'INTERESTED')][0]/number_of_calls_per_region_and_outcome_df.loc[(sector, 'NOT INTERESTED')][0]
+                       for sector in sectors}
+    print('sector interest ratio', sector_interest_ratio)
 
+    ##Given a lead has already expressed interest and signed up:
+    ###signups from which region are most likely to be approved? [2]
+    signed_up_leads = signups.merge(leads, right_on='Name', left_on='Lead', how='left')
+    signed_up_leads_by_region_and_aproval_df = signed_up_leads.groupby(by=['Region', 'Approval Decision']).count()
 
 def further_explore():
     """
