@@ -89,6 +89,12 @@ def further_exploration(calls, leads, signups, folder=None):
     ###signups from which region are most likely to be approved? [2]
     signed_up_leads = signups.merge(leads, right_on='Name', left_on='Lead', how='left')
     signed_up_leads_by_region_and_aproval_df = signed_up_leads.groupby(by=['Region', 'Approval Decision']).count()
+    regions = leads['Region'].unique()
+    region_approval_rate = {region: signed_up_leads_by_region_and_aproval_df.loc[(region, 'APPROVED')][0] / \
+                            (signed_up_leads_by_region_and_aproval_df.loc[(region, 'APPROVED')][0] + \
+                             signed_up_leads_by_region_and_aproval_df.loc[(region, 'REJECTED')][0]) for region in regions}
+    import ipdb; ipdb.set_trace()
+
 
 def further_explore():
     """
