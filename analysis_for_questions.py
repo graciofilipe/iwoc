@@ -6,14 +6,15 @@ import scipy as sp
 from scipy.stats import fisher_exact
 from scipy.stats import chi2_contingency
 from scipy.stats import chi2
+#
+# def further_exploration(calls, leads, signups, folder=None):
+#
+#     number_of_unique_called_numbers = calls['Phone Number'].nunique()
+#     total_number_of_calls = calls.shape[0]
+#     print('average calls per phone number:', total_number_of_calls / number_of_unique_called_numbers)
 
-def further_exploration(calls, leads, signups, folder=None):
-
-    number_of_unique_called_numbers = calls['Phone Number'].nunique()
-    total_number_of_calls = calls.shape[0]
-    print('average calls per phone number:', total_number_of_calls / number_of_unique_called_numbers)
-
-    # For the leads that signed up, how many calls were received, on average?
+# For the leads that signed up, how many calls were received, on average?
+def average_calls_per_signed_up_lead_fun(leads, calls, signups):
     print('\n')
 
     signed_up_names_ls = list(signups['Lead'])
@@ -26,8 +27,16 @@ def further_exploration(calls, leads, signups, folder=None):
     print('average calls per phone number to signed up numbers:',
           total_number_of_calls / number_of_unique_called_numbers)
 
-    # ##Which agent had the most signups? Which assumptions did you make?
-    print('\n')
+# ##Which agent had the most signups? Which assumptions did you make?
+# ##Which agent had the most signups per call?
+## statiscal significant
+
+
+def sign_ups_per_agent_fun(leads, calls, signups):
+    signed_up_names_ls = list(signups['Lead'])
+    signed_up_leads_df = leads[leads['Name'].isin(signed_up_names_ls)]
+    signed_up_phone_numbers_ls = list(signed_up_leads_df['Phone Number'])
+    calls_to_signed_up_numbers_df = calls[calls['Phone Number'].isin(signed_up_phone_numbers_ls)]
 
     calls_per_agent_per_sgined_number_df = calls_to_signed_up_numbers_df.groupby(by=['Phone Number', 'Agent']).count().drop(
         axis=1, labels=['Call Outcome']).rename({'Call Number': 'call_count_per_agent_per_number'}, axis=1)
@@ -42,7 +51,6 @@ def further_exploration(calls, leads, signups, folder=None):
                                                0] / total_calls_to_number  # the contribution of the agents is the faction of calls they placed to the lead
     print('how many sign up counts per agent:', agent_sign_up_counts)
 
-    ##Which agent had the most signups per call?
     print('\n')
 
     number_of_calls_per_agent_df = calls.groupby(by=['Agent']).count().drop(
@@ -52,7 +60,6 @@ def further_exploration(calls, leads, signups, folder=None):
         success_rate_per_agent[agent] = agent_sign_up_counts[agent]/number_of_calls_per_agent_df.loc[agent][0]
     print('the success rate per agent', success_rate_per_agent)
 
-    ## statiscal significant
     print('\n')
     number_of_calls_per_agent_ls = [number_of_calls_per_agent_df.loc[agent][0] for agent in number_of_calls_per_agent_df.index]
     agent_sign_up_counts_ls = [int(agent_sign_up_counts[agent]) for agent in number_of_calls_per_agent_df.index]
@@ -62,7 +69,9 @@ def further_exploration(calls, leads, signups, folder=None):
     stat, pval, dof, expected = chi2_contingency(table)
     print('pval for the difference between success rates happening by chance', pval)
 
-    ## A lead from which region is most likely to be “interested” in the product? [3]
+
+## A lead from which region is most likely to be “interested” in the product? [3]
+def region_interest_ratio_fun(leads, calls):
     print('\n')
     # I'll interpret this as meaning as opposed to "not intested" although one could interpret it differently
     regions = leads['Region'].unique()
@@ -74,8 +83,10 @@ def further_exploration(calls, leads, signups, folder=None):
                        for region in regions}
     print('region interest ratio', region_interest_ratio)
 
+
+##A lead from which sector is most likely to be “interested” in the product? [1]
+def sector_interest_ratio_fun(leads, calls):
     print('\n')
-    ##A lead from which sector is most likely to be “interested” in the product? [1]
     sectors = leads['Sector'].unique()
     calls_and_leads_df = calls.merge(leads, on='Phone Number', how='left')
     number_of_calls_per_region_and_outcome_df  = calls_and_leads_df.groupby(by=['Sector', 'Call Outcome']).count().drop(
@@ -85,15 +96,17 @@ def further_exploration(calls, leads, signups, folder=None):
                        for sector in sectors}
     print('sector interest ratio', sector_interest_ratio)
 
-    ##Given a lead has already expressed interest and signed up:
-    ###signups from which region are most likely to be approved? [2]
+##Given a lead has already expressed interest and signed up:
+###signups from which region are most likely to be approved? [2]
+###Is this statistically significant? Why? [5]
+
+def region_aproval_ratio_fun(leads, signups):
     signed_up_leads = signups.merge(leads, right_on='Name', left_on='Lead', how='left')
     signed_up_leads_by_region_and_aproval_df = signed_up_leads.groupby(by=['Region', 'Approval Decision']).count()
     regions = leads['Region'].unique()
     region_approval_rate = {region: signed_up_leads_by_region_and_aproval_df.loc[(region, 'APPROVED')][0] / \
                             (signed_up_leads_by_region_and_aproval_df.loc[(region, 'APPROVED')][0] + \
                              signed_up_leads_by_region_and_aproval_df.loc[(region, 'REJECTED')][0]) for region in regions}
-    import ipdb; ipdb.set_trace()
 
 
 def further_explore():
@@ -109,10 +122,11 @@ def further_explore():
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
 
-    further_exploration(calls=calls,
-                        leads=leads,
-                        signups=signups)
-
+    average_calls_per_signed_up_lead_fun(leads, calls, signups)
+    sign_ups_per_agent_fun(leads, calls, signups)
+    region_interest_ratio_fun(leads, calls)
+    sector_interest_ratio_fun(leads, calls)
+    region_aproval_ratio_fun(leads, signups)
 
 if __name__ == '__main__':
     further_explore()
