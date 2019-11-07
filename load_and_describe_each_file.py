@@ -58,7 +58,7 @@ def main_explore():
         os.makedirs(output_folder + '/signups')
 
     explore_data(data=calls,
-                 categorical_vars=['Call Outcome', 'Agent'],
+                 categorical_vars=['Call Outcome', 'Agent', 'Phone Number'],
                  numerical_vars=['Call Number'],
                  output_folder=output_folder + '/calls')
 
