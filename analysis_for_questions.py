@@ -4,10 +4,13 @@ from collections import defaultdict
 import pandas as pd
 from scipy.stats import chi2_contingency
 from sklearn import linear_model
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix
 import scipy as sp
+from sklearn import svm
+from sklearn.ensemble import RandomForestClassifier
+
 
 #
 # def further_exploration(calls, leads, signups, folder=None):
@@ -130,7 +133,7 @@ def region_aproval_ratio_fun(leads, signups):
 def most_likely_leads_fun(leads, calls, signups):
 
     # redo this with leads that have been called only
-
+    #TODO: take care of age
     calls_and_leads_df = calls.merge(leads, on='Phone Number', how='left')
     leads_and_signups_df = calls_and_leads_df.merge(signups, right_on='Lead', left_on='Name', how='left')
     leads_and_signups_df.drop_duplicates(subset=['Phone Number', 'Name', 'Approval Decision'], inplace=True)
@@ -139,30 +142,37 @@ def most_likely_leads_fun(leads, calls, signups):
     tmp_modelling_df.replace(to_replace='APPROVED', value=1, inplace=True)
     tmp_modelling_df.replace(to_replace='REJECTED', value=1, inplace=True)
 
-    region_encoder = OneHotEncoder()
-    region_encoded = region_encoder.fit_transform(tmp_modelling_df.Region.values.reshape(-1, 1)).toarray()
-    region_df = pd.DataFrame(data=region_encoded,
-                             columns=[ca for ca in region_encoder.categories_[0]],
-                             index=tmp_modelling_df.index.values)
-    sector_encoder = OneHotEncoder()
-    sector_encoded = sector_encoder.fit_transform(tmp_modelling_df.Sector.values.reshape(-1, 1)).toarray()
-    sector_df = pd.DataFrame(data=sector_encoded,
-                             columns=[ca for ca in sector_encoder.categories_[0]],
-                             index=tmp_modelling_df.index.values)
+    # region_encoder = OneHotEncoder()
+    # region_encoded = region_encoder.fit_transform(tmp_modelling_df.Region.values.reshape(-1, 1)).toarray()
+    # region_df = pd.DataFrame(data=region_encoded,
+    #                          columns=[ca for ca in region_encoder.categories_[0]],
+    #                          index=tmp_modelling_df.index.values)
+    # sector_encoder = OneHotEncoder()
+    # sector_encoded = sector_encoder.fit_transform(tmp_modelling_df.Sector.values.reshape(-1, 1)).toarray()
+    # sector_df = pd.DataFrame(data=sector_encoded,
+    #                          columns=[ca for ca in sector_encoder.categories_[0]],
+    #                          index=tmp_modelling_df.index.values)
 
-    X = pd.concat([sector_df, region_df], axis=1)
-    X['age'] = tmp_modelling_df['Age']
+    # X = pd.concat([sector_df, region_df], axis=1)
+    X = tmp_modelling_df[['Region', 'Sector',  'Age']]
+    region_encoder = LabelEncoder()
+    sector_encoder = LabelEncoder()
+    X['Region'] = region_encoder.fit_transform(X['Region'])
+    X['Sector'] = sector_encoder.fit_transform(X['Sector'])
+
     y = tmp_modelling_df['Approval Decision']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=666)
-    logistic_reg = linear_model.LogisticRegressionCV(fit_intercept=False)
+
     n_pos = sum(y_train)
     n_neg = sum(y_train==0)
     sample_weights = [1/n_neg if outcome ==0 else 1/n_pos for outcome in y_train]
-    logistic_reg.fit(X=X_train, y=y_train, sample_weight=sample_weights)
+
+    clf = RandomForestClassifier()
+    clf.fit(X=X_train, y=y_train, sample_weight=sample_weights)
 
     print('results on TRAINING data')
 
-    y_pred_bin = logistic_reg.predict(X_train)
+    y_pred_bin = clf.predict(X_train)
     tn, fp, fn, tp = confusion_matrix(y_train, y_pred_bin).ravel()
     print('tn', tn)
     print('fp', fp)
@@ -171,7 +181,7 @@ def most_likely_leads_fun(leads, calls, signups):
     print('accuracy', accuracy_score(y_pred=y_pred_bin, y_true=y_train))
 
     print('results on TEST data')
-    y_pred_bin = logistic_reg.predict(X_test)
+    y_pred_bin = clf.predict(X_test)
     tn, fp, fn, tp = confusion_matrix(y_test, y_pred_bin).ravel()
     print('tn', tn)
     print('fp', fp)
@@ -180,7 +190,6 @@ def most_likely_leads_fun(leads, calls, signups):
     print('accuracy', accuracy_score(y_pred=y_pred_bin, y_true=y_test))
 
 
-    import ipdb; ipdb.set_trace()
 
 
 
