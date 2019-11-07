@@ -48,14 +48,12 @@ sector interest ratio {'wholesale': 1.7388059701492538, 'retail': 0.645879732739
 
 ###signups from which region are most likely to be approved? [2]
 
-
-
-
-
-
-
-
 ###Is this statistically significant? Why? [5]
+
+{'north-west': 0.4523809523809524, 'midlands': 0.2857142857142857, 'scotland': 0.45121951219512196, 'south-west': 0.24509803921568626, 'north-east': 0.24390243902439024, 'wales': 0.14705882352941177, 'south-east': 0.3372093023255814, 'south': 0.375, 'northern-ireland': 0.25, 'london': 0.08}
+pval for the difference between region approval rates 9.650022101968577e-06
+
+
 
 ##Suppose you wanted to pick the 1000 leads most likely to sign up (who have not been called so far), based only on age, sector and region.
 
