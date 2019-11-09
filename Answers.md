@@ -13,11 +13,11 @@ Finally, below are the answers to the questions. All of them come from the code,
 ## Which agent made the most calls? 
 Orange: 2234
 
-##For the leads that received one or more calls, how many calls were received on average? [2]
+## For the leads that received one or more calls, how many calls were received on average? [2]
 1.84
 
 
-##For the leads that signed up, how many calls were received, on average? [2]
+## For the leads that signed up, how many calls were received, on average? [2]
 2.1
 
 
