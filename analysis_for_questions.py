@@ -1,23 +1,23 @@
 import os
-import logging
+
+import numpy as np
 import pandas as pd
 from scipy.stats import chi2_contingency
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-import numpy as np
-np.random.seed(6)
 
+np.random.seed(6)
 
 
 ##For the leads that received one or more calls, how many calls were received on average? [2]
 def calls_per_called_lead_fun(calls, file_handle):
     number_of_unique_called_numbers = calls['Phone Number'].nunique()
     total_number_of_calls = calls.shape[0]
-    file_handle.write(f'average calls per phone number: {np.round(total_number_of_calls / number_of_unique_called_numbers,2)}\n')
+    file_handle.write(
+        f'average calls per phone number: {np.round(total_number_of_calls / number_of_unique_called_numbers, 2)}\n')
     file_handle.write('\n')
-
 
 
 # For the leads that signed up, how many calls were received, on average?
@@ -29,9 +29,9 @@ def average_calls_per_signed_up_lead_fun(leads, calls, signups, file_handle):
 
     number_of_unique_called_numbers = calls_to_signed_up_numbers_df['Phone Number'].nunique()
     total_number_of_calls = calls_to_signed_up_numbers_df.shape[0]
-    file_handle.write(f'average calls per phone number to signed up numbers: {np.round(total_number_of_calls / number_of_unique_called_numbers,2)}\n')
+    file_handle.write(
+        f'average calls per phone number to signed up numbers: {np.round(total_number_of_calls / number_of_unique_called_numbers, 2)}\n')
     file_handle.write('\n')
-
 
 
 # ##Which agent had the most signups? Which assumptions did you make?
@@ -50,14 +50,14 @@ def sign_ups_per_agent_fun(leads, calls, signups, file_handle):
     total_calls_to_number_df = calls_to_signed_up_numbers_df.groupby(by='Phone Number').count().drop(axis=1, labels=[
         'Call Outcome', 'Agent']).rename({'Call Number': 'call_count_per_number'}, axis=1)
 
-    agent_sign_up_counts = {agent:0 for agent in agents}
+    agent_sign_up_counts = {agent: 0 for agent in agents}
     for number in signed_up_phone_numbers_ls:
         total_calls_to_number = total_calls_to_number_df.loc[number][0]
         calls_to_number_by_agents = calls_per_agent_per_sgined_number_df.loc[number]
         for agent in calls_to_number_by_agents.index:
             agent_sign_up_counts[agent] += calls_to_number_by_agents.loc[agent][
-                                               0] / total_calls_to_number # the contribution of the agents is the faction of calls they placed to the signed lead
-    agent_sign_up_counts = {k:np.round(v, 1) for k, v in agent_sign_up_counts.items()}
+                                               0] / total_calls_to_number  # the contribution of the agents is the faction of calls they placed to the signed lead
+    agent_sign_up_counts = {k: np.round(v, 1) for k, v in agent_sign_up_counts.items()}
     file_handle.write(f'how many sign up counts per agent: {agent_sign_up_counts}\n')
 
     # signs ups per call
@@ -65,7 +65,8 @@ def sign_ups_per_agent_fun(leads, calls, signups, file_handle):
         axis=1, labels=['Phone Number', 'Call Outcome']).rename({'Call Number': 'call_count_per_agent'}, axis=1)
     success_rate_per_agent = {}
     for agent in number_of_calls_per_agent_df.index:
-        success_rate_per_agent[agent] = np.round(agent_sign_up_counts[agent] / number_of_calls_per_agent_df.loc[agent][0],2)
+        success_rate_per_agent[agent] = np.round(
+            agent_sign_up_counts[agent] / number_of_calls_per_agent_df.loc[agent][0], 2)
     file_handle.write(f'the success rate per agent:  {success_rate_per_agent}\n')
 
     # the statistical significance of different agent sign up rates
@@ -78,7 +79,6 @@ def sign_ups_per_agent_fun(leads, calls, signups, file_handle):
     stat, pval, dof, expected = chi2_contingency(table)
     file_handle.write(f'pval for the difference between success rates happening by chance  {pval}\n')
     file_handle.write('\n')
-
 
 
 ## A lead from which region is most likely to be “interested” in the product? [3]
@@ -114,7 +114,6 @@ def sector_interest_ratio_fun(leads, calls, file_handle):
     file_handle.write('\n')
 
 
-
 ##Given a lead has already expressed interest and signed up:
 ###signups from which region are most likely to be approved? [2]
 ###Is this statistically significant? Why? [5]
@@ -138,7 +137,6 @@ def region_aproval_ratio_fun(leads, signups, file_handle):
     file_handle.write('\n')
 
 
-
 ##Suppose you wanted to pick the 1000 leads most likely to sign up (who have not been called so far), based only on age, sector and region.
 ###What criteria would you use to pick those leads? [10]
 ###In what sense are those an optimal criteria set? [3]
@@ -152,30 +150,30 @@ def most_likely_leads_fun(leads, calls, signups, file_handle):
 
     leads_and_signups_df = calls_and_leads_df.merge(signups, right_on='Lead', left_on='Name', how='left')
     leads_and_signups_df.drop_duplicates(subset=['Phone Number', 'Name', 'Approval Decision'], inplace=True)
-    tmp_modelling_df = leads_and_signups_df.loc[:,['Region', 'Sector', 'Age', 'Approval Decision']]
-    tmp_modelling_df.loc[:,'Approval Decision'] = tmp_modelling_df['Approval Decision'].fillna(0)
+    tmp_modelling_df = leads_and_signups_df.loc[:, ['Region', 'Sector', 'Age', 'Approval Decision']]
+    tmp_modelling_df.loc[:, 'Approval Decision'] = tmp_modelling_df['Approval Decision'].fillna(0)
     tmp_modelling_df.replace(to_replace='APPROVED', value=1, inplace=True)
     tmp_modelling_df.replace(to_replace='REJECTED', value=1, inplace=True)
     tmp_modelling_df = tmp_modelling_df.loc[tmp_modelling_df['Age'] < 90]
 
-    X = tmp_modelling_df.loc[:,['Region', 'Sector', 'Age']]
+    X = tmp_modelling_df.loc[:, ['Region', 'Sector', 'Age']]
     region_encoder = LabelEncoder()
     sector_encoder = LabelEncoder()
-    X.loc[:,'Region'] = region_encoder.fit_transform(X['Region'])
-    X.loc[:,'Sector'] = sector_encoder.fit_transform(X['Sector'])
+    X.loc[:, 'Region'] = region_encoder.fit_transform(X['Region'])
+    X.loc[:, 'Sector'] = sector_encoder.fit_transform(X['Sector'])
 
     y = tmp_modelling_df['Approval Decision']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=666)
 
     n_pos = sum(y_train)
     n_neg = sum(y_train == 0)
-    file_handle.write(f'class balances:  positive:  {np.round(n_pos/len(y_train),2)}   negative: {np.round(n_neg/len(y_train),2)}\n')
-    sample_weights = [1/n_neg if outcome == 0 else 1/n_pos for outcome in y_train]
+    file_handle.write(
+        f'class balances:  positive:  {np.round(n_pos / len(y_train), 2)}   negative: {np.round(n_neg / len(y_train), 2)}\n')
+    sample_weights = [1 / n_neg if outcome == 0 else 1 / n_pos for outcome in y_train]
 
     ### MODELING FITTING
     clf = RandomForestClassifier(n_estimators=6)
     clf.fit(X=X_train, y=y_train, sample_weight=sample_weights)
-
 
     file_handle.write('results on TEST data \n')
 
@@ -184,30 +182,27 @@ def most_likely_leads_fun(leads, calls, signups, file_handle):
     y_test_prob = [test_probs[i][1] for i in range(len(test_probs))]
     tn, fp, fn, tp = confusion_matrix(y_test, y_pred_bin).ravel()
     file_handle.write(f'tn:{tn}  fp:{fp}  fn:{fn}  tp:{tp} \n')
-    file_handle.write(f'accuracy {np.round(accuracy_score(y_pred=y_pred_bin, y_true=y_test),2)} \n')
-    file_handle.write(f'auc  {np.round(roc_auc_score(y_true=y_test, y_score=y_test_prob),2)} \n')
-
+    file_handle.write(f'accuracy {np.round(accuracy_score(y_pred=y_pred_bin, y_true=y_test), 2)} \n')
+    file_handle.write(f'auc  {np.round(roc_auc_score(y_true=y_test, y_score=y_test_prob), 2)} \n')
 
     # ## REUSE ON NON CALLED LEADS ##
     uncalled_leads = leads.loc[~leads['Phone Number'].isin(called_numbers_ls)]
-    uncalled_leads.loc[:,'Region'] = region_encoder.fit_transform(uncalled_leads['Region'])
-    uncalled_leads.loc[:,'Sector'] = sector_encoder.fit_transform(uncalled_leads['Sector'])
+    uncalled_leads.loc[:, 'Region'] = region_encoder.fit_transform(uncalled_leads['Region'])
+    uncalled_leads.loc[:, 'Sector'] = sector_encoder.fit_transform(uncalled_leads['Sector'])
     uncalled_leads.drop(['Name', 'Phone Number'], axis=1, inplace=True)
-
 
     probs = clf.predict_proba(uncalled_leads)
     y_prob_for_uncalled_leads = [probs[i][1] for i in range(len(probs))]
     y_prob_for_uncalled_leads.sort()
     prob_of_1000th_lead = y_prob_for_uncalled_leads[-1000]
-    file_handle.write(f'probability at the 1000th most likely lead: {np.round(prob_of_1000th_lead,2)}\n')
+    file_handle.write(f'probability at the 1000th most likely lead: {np.round(prob_of_1000th_lead, 2)}\n')
     y_test_pred_bin_at_new_threshold = [1 if p > prob_of_1000th_lead else 0 for p in y_test_prob]
     tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred_bin_at_new_threshold).ravel()
     file_handle.write(
         'the metrics of success/failure for the calls with a probability equal or grater than the top 1000 most likely leads are\n')
     file_handle.write(f'p:{fp}  tp:{tp} \n')
-    file_handle.write(f'fraction of positives in the 1000 top best leads to call:  {np.round(tp/(tp+fp), 2)}\n')
+    file_handle.write(f'fraction of positives in the 1000 top best leads to call:  {np.round(tp / (tp + fp), 2)}\n')
     file_handle.write('\n')
-
 
 
 def further_explore():
@@ -232,8 +227,6 @@ def further_explore():
     region_aproval_ratio_fun(leads, signups, file_handle)
     most_likely_leads_fun(leads, calls, signups, file_handle)
     file_handle.close()
-
-
 
 
 if __name__ == '__main__':
