@@ -10,9 +10,14 @@ from sklearn.preprocessing import LabelEncoder
 import numpy as np
 np.random.seed(6)
 
+##For the leads that received one or more calls, how many calls were received on average? [2]
+def calls_per_called_lead_fun(calls):
+    number_of_unique_called_numbers = calls['Phone Number'].nunique()
+    total_number_of_calls = calls.shape[0]
+    print('average calls per phone number:', total_number_of_calls / number_of_unique_called_numbers)
+
 # For the leads that signed up, how many calls were received, on average?
 def average_calls_per_signed_up_lead_fun(leads, calls, signups):
-    print('\n')
 
     signed_up_names_ls = list(signups['Lead'])
     signed_up_leads_df = leads[leads['Name'].isin(signed_up_names_ls)]
