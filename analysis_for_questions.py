@@ -11,7 +11,7 @@ from sklearn.preprocessing import LabelEncoder
 np.random.seed(6)
 
 
-##For the leads that received one or more calls, how many calls were received on average? [2]
+##For the leads that received one or more calls, how many calls were received on average?
 def calls_per_called_lead_fun(calls, file_handle):
     number_of_unique_called_numbers = calls['Phone Number'].nunique()
     total_number_of_calls = calls.shape[0]
@@ -34,9 +34,9 @@ def average_calls_per_signed_up_lead_fun(leads, calls, signups, file_handle):
     file_handle.write('\n')
 
 
-# ##Which agent had the most signups? Which assumptions did you make?
-# ##Which agent had the most signups per call?
-## statiscal significant
+## Which agent had the most signups? Which assumptions did you make?
+## Which agent had the most signups per call?
+## Is this statistically significant? Why?
 def sign_ups_per_agent_fun(leads, calls, signups, file_handle):
     agents = list(calls['Agent'].unique())
     signed_up_names_ls = list(signups['Lead'])
@@ -81,7 +81,7 @@ def sign_ups_per_agent_fun(leads, calls, signups, file_handle):
     file_handle.write('\n')
 
 
-## A lead from which region is most likely to be “interested” in the product? [3]
+## A lead from which region is most likely to be “interested” in the product?
 def region_interest_ratio_fun(leads, calls, file_handle):
     # I'll interpret this as meaning as opposed to "not intested" although one could interpret it differently
     regions = leads['Region'].unique()
@@ -98,7 +98,7 @@ def region_interest_ratio_fun(leads, calls, file_handle):
     file_handle.write('\n')
 
 
-##A lead from which sector is most likely to be “interested” in the product? [1]
+##A lead from which sector is most likely to be “interested” in the product?
 def sector_interest_ratio_fun(leads, calls, file_handle):
     sectors = leads['Sector'].unique()
     calls_and_leads_df = calls.merge(leads, on='Phone Number', how='left')
@@ -114,9 +114,9 @@ def sector_interest_ratio_fun(leads, calls, file_handle):
     file_handle.write('\n')
 
 
-##Given a lead has already expressed interest and signed up:
-###signups from which region are most likely to be approved? [2]
-###Is this statistically significant? Why? [5]
+## Given a lead has already expressed interest and signed up:
+## signups from which region are most likely to be approved?
+## Is this statistically significant? Why?
 def region_aproval_ratio_fun(leads, signups, file_handle):
     signed_up_leads = signups.merge(leads, right_on='Name', left_on='Lead', how='left')
     signed_up_leads_by_region_and_aproval_df = signed_up_leads.groupby(by=['Region', 'Approval Decision']).count()
@@ -138,10 +138,9 @@ def region_aproval_ratio_fun(leads, signups, file_handle):
 
 
 ##Suppose you wanted to pick the 1000 leads most likely to sign up (who have not been called so far), based only on age, sector and region.
-###What criteria would you use to pick those leads? [10]
-###In what sense are those an optimal criteria set? [3]
-###How many signups would you expect to get based on those called leads, assuming they were being called by random agents? [3]
-###If you could choose the agents to make those calls, who would you choose? Why? [3]
+###What criteria would you use to pick those leads?
+###In what sense are those an optimal criteria set?
+###How many signups would you expect to get based on those called leads, assuming they were being called by random agents?
 
 def most_likely_leads_fun(leads, calls, signups, file_handle):
     ### DATA PREP
@@ -156,30 +155,29 @@ def most_likely_leads_fun(leads, calls, signups, file_handle):
     tmp_modelling_df.replace(to_replace='REJECTED', value=1, inplace=True)
     tmp_modelling_df = tmp_modelling_df.loc[tmp_modelling_df['Age'] < 90]
 
+    # preparing the datasets for the model
     X = tmp_modelling_df.loc[:, ['Region', 'Sector', 'Age']]
     region_encoder = LabelEncoder()
     sector_encoder = LabelEncoder()
     X.loc[:, 'Region'] = region_encoder.fit_transform(X['Region'])
     X.loc[:, 'Sector'] = sector_encoder.fit_transform(X['Sector'])
-
     y = tmp_modelling_df['Approval Decision']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=666)
 
+    # because of class imbalance
     n_pos = sum(y_train)
     n_neg = sum(y_train == 0)
     file_handle.write(
-        f'class balances:  positive:  {np.round(n_pos / len(y_train), 2)}   negative: {np.round(n_neg / len(y_train), 2)}\n')
+        f'class balances:  positive: {np.round(n_pos / len(y_train), 2)}   negative: {np.round(n_neg / len(y_train), 2)}\n')
     sample_weights = [1 / n_neg if outcome == 0 else 1 / n_pos for outcome in y_train]
 
-    ### MODELING FITTING
-    clf = RandomForestClassifier(n_estimators=6)
+    ### MODELING FITTING and evaluation
+    clf = RandomForestClassifier(n_estimators=3, min_samples_split=0.1)
     clf.fit(X=X_train, y=y_train, sample_weight=sample_weights)
-
     file_handle.write('results on TEST data \n')
-
     y_pred_bin = clf.predict(X_test)
-    test_probs = clf.predict_proba(X_test)
-    y_test_prob = [test_probs[i][1] for i in range(len(test_probs))]
+    two_class_probs = clf.predict_proba(X_test)
+    y_test_prob = [two_class_probs[i][1] for i in range(len(two_class_probs))]
     tn, fp, fn, tp = confusion_matrix(y_test, y_pred_bin).ravel()
     file_handle.write(f'tn:{tn}  fp:{fp}  fn:{fn}  tp:{tp} \n')
     file_handle.write(f'accuracy {np.round(accuracy_score(y_pred=y_pred_bin, y_true=y_test), 2)} \n')
@@ -187,8 +185,8 @@ def most_likely_leads_fun(leads, calls, signups, file_handle):
 
     # ## REUSE ON NON CALLED LEADS ##
     uncalled_leads = leads.loc[~leads['Phone Number'].isin(called_numbers_ls)]
-    uncalled_leads.loc[:, 'Region'] = region_encoder.fit_transform(uncalled_leads['Region'])
-    uncalled_leads.loc[:, 'Sector'] = sector_encoder.fit_transform(uncalled_leads['Sector'])
+    uncalled_leads.loc[:, 'Region'] = region_encoder.transform(uncalled_leads['Region'])
+    uncalled_leads.loc[:, 'Sector'] = sector_encoder.transform(uncalled_leads['Sector'])
     uncalled_leads.drop(['Name', 'Phone Number'], axis=1, inplace=True)
 
     probs = clf.predict_proba(uncalled_leads)
@@ -200,8 +198,8 @@ def most_likely_leads_fun(leads, calls, signups, file_handle):
     tn, fp, fn, tp = confusion_matrix(y_test, y_test_pred_bin_at_new_threshold).ravel()
     file_handle.write(
         'the metrics of success/failure for the calls with a probability equal or grater than the top 1000 most likely leads are\n')
-    file_handle.write(f'p:{fp}  tp:{tp} \n')
-    file_handle.write(f'fraction of positives in the 1000 top best leads to call:  {np.round(tp / (tp + fp), 2)}\n')
+    file_handle.write(f'fp:{fp}  tp:{tp} \n')
+    file_handle.write(f'expected fraction of positives in the 1000 top best leads to call:  {np.round(tp / (tp + fp), 2)}\n')
     file_handle.write('\n')
 
 

@@ -1,5 +1,5 @@
 This file covers how to execute code to reproduce and obtain all the results. 
-For comments and answers to the questions look at the Comment.md and  Q&A.md files respectively. 
+For answers to the questions look at Answers.md 
 
 
 ## To be able ro tun: 
@@ -30,4 +30,4 @@ This will produce info about each file save log files in the `exploratory_analys
 ```.env
 $python analysis_for_questions.py
 ```
-This will 
+This will produce a file of the main numerical observations required to answer the questions. That file is in the QA folder.
