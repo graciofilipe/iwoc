@@ -1,0 +1,25 @@
+average calls per phone number: 1.84
+
+average calls per phone number to signed up numbers: 2.1
+
+how many sign up counts per agent: {'orange': 308.4, 'red': 286.9, 'green': 60.8, 'blue': 46.0, 'black': 65.8}
+the success rate per agent:  {'black': 0.09, 'blue': 0.23, 'green': 0.18, 'orange': 0.14, 'red': 0.19}
+pval for the difference between success rates happening by chance  4.68462083699195e-12
+
+region interest ratio  {'north-west': 1.71, 'midlands': 0.6, 'scotland': 0.93, 'south-west': 1.5, 'north-east': 0.98, 'wales': 0.51, 'south-east': 1.06, 'south': 0.84, 'northern-ireland': 1.0, 'london': 5.09}
+
+sector interest ratio {'wholesale': 1.74, 'retail': 0.65, 'agriculture': 0.79, 'food': 0.95, 'construction': 0.48, 'consultancy': 2.45, 'entertainment': 1.38}
+
+region approval rate {'north-west': 0.45, 'midlands': 0.29, 'scotland': 0.45, 'south-west': 0.25, 'north-east': 0.24, 'wales': 0.15, 'south-east': 0.34, 'south': 0.38, 'northern-ireland': 0.25, 'london': 0.08} 
+pval for the difference between region approval rates 9.650022101968577e-06 
+
+class balances:  positive:  0.29   negative: 0.71
+results on TEST data 
+tn:476  fp:157  fn:166  tp:71 
+accuracy 0.63 
+auc  0.55 
+probability at the 1000th most likely lead: 0.69
+the metrics of success/failure for the calls with a probability equal or grater than the top 1000 most likely leads are
+p:74  tp:42 
+fraction of positives in the 1000 top best leads to call:  0.36
+
