@@ -74,7 +74,7 @@ To get this number the process is the following:
 So following this strategy, 36% of the leads called are predicted to sign up. That is considerably better than the current overall sign up rate of 29%. (but obviously, restricting the calls to the top 1000 most likely might represent lower total volume)
 
 ### If you could choose the agents to make those calls, who would you choose? Why? [3]
-The sophisticated way to do this would be the following: 
+If one cared only about maximising the sign ups, the sophisticated way to do this would be the following: 
 * build a model again which this time includes "agent" as a feature.
 * make predictions on the probability of sign up by testing each agent for each lead. As a result we'd know what is the agent that maximises the probability of sign up for each lead
 * have each lead be called by the agent that most maximises it's sign up OR
@@ -83,3 +83,5 @@ The sophisticated way to do this would be the following:
 One important thing to solve in the above process would be "how to assign an agent to a sign up?". Just like before we could use the fractional attribution model, or we could use a last-touch attribution model. 
 
 Alternatively to the more sophisticated approach above, one could chose agent Blue which has the highest success rate. A reason why that might not be optimal, of course, is that the top 1000 calls do *not* have the same profile as a random draw of the previous calls and so there is no guarantee that on these leads Blue is still the best. 
+
+Finally it's worth saying that maximising sign up probability might not be the goal (one might want to divide work, or prioritise speed, etc)
