@@ -2,8 +2,7 @@ import os
 
 import pandas as pd
 
-
-def explore_data(data, numerical_vars=None, categorical_vars=None, output_folder='exploratory_analysis'):
+def explore_data(data, categorical_vars=None, output_folder='exploratory_analysis'):
     """
     runs a simple exploration of the dataset and writes results to info files, and plots the latitude and longitude data
     :param data: pandas dataframe of the data
@@ -59,17 +58,14 @@ def main_explore():
 
     explore_data(data=calls,
                  categorical_vars=['Call Outcome', 'Agent', 'Phone Number'],
-                 numerical_vars=['Call Number'],
                  output_folder=output_folder + '/calls')
 
     explore_data(data=leads,
                  categorical_vars=['Name', 'Phone Number', 'Region', 'Sector', 'Age'],
-                 numerical_vars=['Call Number'],
                  output_folder=output_folder + '/leads')
 
     explore_data(data=signups,
                  categorical_vars=['Lead', 'Approval Decision'],
-                 numerical_vars=['Call Number'],
                  output_folder=output_folder + '/signups')
 
 

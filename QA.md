@@ -14,7 +14,7 @@ Orange: 2234
 
 ##Which agent had the most signups? Which assumptions did you make? (note that there is a many-to-one relationship between calls and leads) [4]
 I gave fractional attribution to each agent for each sign up. That is, for an agent to get a full 1 sign up, they must be the only one calling. If two agents called the person each gets 0.5. If they called twice and someone else once, then they get two thirds, etc. 
-With that methodology, agent orange gets the most sign ups with around 308. 
+With that methodology, agent orange gets the most sign ups with around 308 "sign ups"
 
 
 ## Which agent had the most signups per call? [2]
