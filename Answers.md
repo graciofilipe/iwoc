@@ -72,7 +72,7 @@ To get this number the process is the following:
 * go to the test dataset and mark as "positive" all the predictions that have a probability greater than 0.69
 * calculate the % of true positives among that group: 41%
 
-So following this strategy, over 40% of the leads called are predicted to sign up. That is considerably better than the current overall sign up rate of 29%! (but obviously, restricting the calls to the top 1000 most likely might represent lower total volume)
+So following this strategy, over 400 of the leads called are predicted to sign up. That is considerably better than the random strategy which would be expected to have about 290 (the current sign up rate). Obviously, restricting the calls to the top 1000 most likely might represent lower total volume. 
 
 ### If you could choose the agents to make those calls, who would you choose? Why? [3]
 If one cared only about maximising the sign ups, the sophisticated way to do this would be the following: 
