@@ -15,11 +15,11 @@ pval for the difference between region approval rates 9.650022101968577e-06
 
 class balances:  positive: 0.29   negative: 0.71
 results on TEST data 
-tn:356  fp:277  fn:102  tp:135 
-accuracy 0.56 
-auc  0.58 
-probability at the 1000th most likely lead: 0.59
+tn:332  fp:301  fn:89  tp:148 
+accuracy 0.55 
+auc  0.6 
+probability at the 1000th most likely lead: 0.62
 the metrics of success/failure for the calls with a probability equal or grater than the top 1000 most likely leads are
-fp:68  tp:40 
-expected fraction of positives in the 1000 top best leads to call:  0.37
+fp:52  tp:36 
+expected fraction of positives in the 1000 top best leads to call:  0.41
 
