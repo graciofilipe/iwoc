@@ -30,4 +30,4 @@ This will produce info about each file save log files in the `exploratory_analys
 ```.env
 $python analysis_for_questions.py
 ```
-This will produce a file of the main numerical observations required to answer the questions. That file is in the QA folder.
+This will produce the file `analysis_logs.txt` of the main numerical observations required to answer the questions. That file is in the `answers_logs` folder.

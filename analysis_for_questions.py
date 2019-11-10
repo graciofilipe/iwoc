@@ -11,7 +11,7 @@ from sklearn.preprocessing import LabelEncoder
 np.random.seed(6)
 
 
-##For the leads that received one or more calls, how many calls were received on average?
+## For the leads that received one or more calls, how many calls were received on average?
 def calls_per_called_lead_fun(calls, file_handle):
     number_of_unique_called_numbers = calls['Phone Number'].nunique()
     total_number_of_calls = calls.shape[0]
@@ -20,7 +20,7 @@ def calls_per_called_lead_fun(calls, file_handle):
     file_handle.write('\n')
 
 
-# For the leads that signed up, how many calls were received, on average?
+## For the leads that signed up, how many calls were received, on average?
 def average_calls_per_signed_up_lead_fun(leads, calls, signups, file_handle):
     signed_up_names_ls = list(signups['Lead'])
     signed_up_leads_df = leads[leads['Name'].isin(signed_up_names_ls)]
@@ -156,7 +156,7 @@ def most_likely_leads_fun(leads, calls, signups, file_handle):
     tmp_modelling_df = tmp_modelling_df.loc[tmp_modelling_df['Age'] < 90]
 
     # preparing the datasets for the model
-    X = tmp_modelling_df.loc[:, ['Region', 'Sector', 'Age']]
+    X = tmp_modelling_df.loc[:, ['Region', 'Sector']]
     region_encoder = LabelEncoder()
     sector_encoder = LabelEncoder()
     X.loc[:, 'Region'] = region_encoder.fit_transform(X['Region'])
@@ -172,7 +172,7 @@ def most_likely_leads_fun(leads, calls, signups, file_handle):
     sample_weights = [1 / n_neg if outcome == 0 else 1 / n_pos for outcome in y_train]
 
     ### MODELING FITTING and evaluation
-    clf = RandomForestClassifier(n_estimators=3, min_samples_split=0.1)
+    clf = RandomForestClassifier()
     clf.fit(X=X_train, y=y_train, sample_weight=sample_weights)
     file_handle.write('results on TEST data \n')
     y_pred_bin = clf.predict(X_test)
@@ -187,8 +187,7 @@ def most_likely_leads_fun(leads, calls, signups, file_handle):
     uncalled_leads = leads.loc[~leads['Phone Number'].isin(called_numbers_ls)]
     uncalled_leads.loc[:, 'Region'] = region_encoder.transform(uncalled_leads['Region'])
     uncalled_leads.loc[:, 'Sector'] = sector_encoder.transform(uncalled_leads['Sector'])
-    uncalled_leads.drop(['Name', 'Phone Number'], axis=1, inplace=True)
-
+    uncalled_leads.drop(['Name', 'Phone Number', 'Age'], axis=1, inplace=True)
     probs = clf.predict_proba(uncalled_leads)
     y_prob_for_uncalled_leads = [probs[i][1] for i in range(len(probs))]
     y_prob_for_uncalled_leads.sort()
@@ -212,11 +211,11 @@ def further_explore():
     leads = pd.read_csv('input_data/leads.csv')
     signups = pd.read_csv('input_data/signups.csv')
 
-    output_folder = 'QA'
+    output_folder = 'answers_logs'
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
 
-    file_handle = open(f'{output_folder}/analysis_logs.txt', 'w')
+    file_handle = open(f'{output_folder}/answers_logs.txt', 'w')
     calls_per_called_lead_fun(calls, file_handle)
     average_calls_per_signed_up_lead_fun(leads, calls, signups, file_handle)
     sign_ups_per_agent_fun(leads, calls, signups, file_handle)
